@@ -9,7 +9,7 @@
       <tbody>
         <tr v-for="(item, idx) in data" :key="idx">
           <td v-for="col in columns" :key="col.key">
-            {{ item[col.key] }}
+            <span v-html="item[col.key]"></span>
           </td>
         </tr>
       </tbody>
@@ -25,12 +25,10 @@
 import { defineProps } from 'vue';
 
 defineProps({
-  // Массив записей из API
   data: {
     type: Array,
     default: () => []
   },
-  // Массив колонок вида: [{ key: 'total_price', label: 'Сумма продаж' }, ...]
   columns: {
     type: Array,
     required: true,
@@ -39,25 +37,28 @@ defineProps({
 });
 </script>
 
-<style scoped>
-.table-container {
-  overflow-x: auto;
+<style>
+.top-change-table {
   margin-top: 1rem;
 }
-
-table {
+.table-container {
+  overflow-x: auto;
+}
+.data-table {
   width: 100%;
   border-collapse: collapse;
-  text-align: left;
 }
 
-th,
-td {
-  padding: 0.75rem;
-  border-bottom: 1px solid #ddd;
+.data-table th, td {
+  border: 1px solid #eee;
+  padding: 0.5rem;
+  text-align: center;
 }
 
-th {
-  background-color: #f2f2f2;
+.up {
+  color: #42b883;
+}
+.down {
+  color: #e74c3c;
 }
 </style>

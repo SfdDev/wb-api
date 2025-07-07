@@ -3,10 +3,12 @@
     <h2>Доходы</h2>
 
     <form @submit.prevent="refreshData">
-      <input v-model="filters.dateFrom" type="date">
-      <input v-model="filters.dateTo" type="date">
-      <button type="submit">Фильтр</button>
-    </form>
+        <div class="filters">
+          <input v-model="filters.dateFrom" type="date">
+          <input v-model="filters.dateTo" type="date">
+          <button type="submit">Применить фильтры</button>
+        </div>
+      </form>
 
     <div v-if="loading">Загрузка данных...</div>
     <div v-else-if="error" class="text-danger">{{ error }}</div>
