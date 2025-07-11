@@ -6,10 +6,8 @@ export function useTable () {
     };
       
       function getTopChanges(type, valueField, source, prevData) {
-        console.log(prevData);
         const current = filteredDataByType(type, source);
         const prev = filteredDataByType(type, prevData);
-        console.log(prev);
         const prevMap = {};
         prev.forEach(item => {
           prevMap[item.nm_id] = item;

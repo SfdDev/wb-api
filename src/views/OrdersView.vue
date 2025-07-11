@@ -11,13 +11,8 @@
     <div v-if="loading">Загрузка данных...</div>
     <div v-else-if="error" class="text-danger">{{ error }}</div>
     <div v-else>
-      <ChartComponent chart-id="sales-chart" :chart-data="chartData" chart-type="line" />
-      <DataTable :data="data?.data || []"
-        :columns="[
-          { key: 'brand', label: 'Бренд' },
-          { key: 'category', label: 'Категория' }
-        ]"
-      />
+      <ChartComponent chart-id="orders-chart" :chart-data="chartData" chart-type="line" />
+      <DataTable :data="data?.data || []" :columns="columns" />
       <Pagination
         v-if="data?.meta"
         :links="data.links"
@@ -29,7 +24,7 @@
 </template>
 
 <script setup>
-import { useOrdersPage } from '@/composables/useOrdersPage';
+import { useTablePage } from '@/composables/useTablePage';
 import ChartComponent from '@/components/ChartComponent.vue';
 import DataTable from '@/components/DataTable.vue';
 import Pagination from '@/components/Pagination.vue';
@@ -41,6 +36,23 @@ const {
   error,
   chartData,
   refreshData,
-  handlePageChange
-} = useOrdersPage();
+  handlePageChange,
+  columns
+} = useTablePage({
+  endpoint: '/orders',
+  filterKey: 'orders',
+  defaultFilters: {
+    dateFrom: '2025-01-01',
+    dateTo: '2025-12-31',
+    page: 1,
+    limit: 10
+  },
+  chartField: 'total_price',
+  chartLabel: 'Сумма продаж',
+  chartColor: '#42b883',
+  columns: [
+    { key: 'brand', label: 'Бренд' },
+    { key: 'category', label: 'Категория' }
+  ]
+});
 </script>

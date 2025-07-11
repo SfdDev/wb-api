@@ -1,21 +1,19 @@
 import { ref, computed, onMounted } from 'vue';
 import { useAPI } from '@/composables/useAPI';
-import { useRouter, useRoute } from 'vue-router';
 import { usePageFilters } from '@/composables/usePageFilters';
 
-export function useSalesPage() {
-  const router = useRouter();
-  const route = useRoute();
-  const defaultFilters = {
-    dateFrom: '2025-01-01',
-    dateTo: '2025-12-31',
-    page: 1,
-    limit: 10
-  };
-  
-  const { filters, updateFilters, clearFilters } = usePageFilters('sales', defaultFilters);
-
-  const { fetchData, data, loading, error } = useAPI('/sales');
+export function useTablePage({
+  endpoint,
+  filterKey,
+  defaultFilters,
+  chartField,
+  chartLabel,
+  chartColor,
+  columns,
+  getRequestParams
+}) {
+  const { filters, updateFilters, clearFilters } = usePageFilters(filterKey, defaultFilters);
+  const { fetchData, data, loading, error } = useAPI(endpoint);
 
   onMounted(() => {
     loadData();
@@ -27,11 +25,14 @@ export function useSalesPage() {
   }
 
   async function loadData() {
-    const params = {
-      ...filters
-    };
+    let params = { ...filters };
+    if (typeof getRequestParams === 'function') {
+      params = getRequestParams(filters);
+    }
     await fetchData(params).then(() => {
-      filters.limit = data.value.meta.per_page;
+      if (data.value?.meta?.per_page) {
+        filters.limit = data.value.meta.per_page;
+      }
     });
   }
 
@@ -43,14 +44,15 @@ export function useSalesPage() {
 
   const chartData = computed(() => {
     if (!data.value?.data) return { labels: [], datasets: [] };
-    const labels = data.value.data.map((_, i) => `Запись ${i + 1}`);
-    const values = data.value.data.map(item => item.finished_price || 0);
+    const arr = data.value.data;
+    const labels = arr.map((_, i) => `Запись ${i + 1}`);
+    const values = arr.map(item => item[chartField] || 0);
     return {
       labels,
       datasets: [{
-        label: 'Цена продажи',
+        label: chartLabel,
         data: values,
-        borderColor: '#42b883',
+        borderColor: chartColor,
         fill: false
       }]
     };
@@ -65,6 +67,7 @@ export function useSalesPage() {
     refreshData,
     handlePageChange,
     updateFilters,
-    clearFilters
+    clearFilters,
+    columns
   };
 } 

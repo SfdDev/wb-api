@@ -11,7 +11,7 @@
     </form>
 
     <div v-if="loading">Загрузка данных...</div>
-    <!-- <div v-else-if="error" class="text-danger">{{ error }}</div> -->
+    
     <template v-else>
 
       <div class="chart-block">
@@ -42,11 +42,11 @@
         
       </div>
 
-      <!-- <div class="chart-block">
+       <div class="chart-block">
         <h3>Процент скидки</h3>
         <ChartComponent
           chart-id="discount-percent"
-          :chart-data="incomesChartData"
+          :chart-data="stocksChartData"
           chart-type="line"
         />
  
@@ -54,7 +54,7 @@
           :data="topDiscountPercentChanges"
           :columns="topChangeColumns"
         />
-      </div> -->
+      </div> 
 
       <div class="chart-block">
         <h3>ID дохода</h3>

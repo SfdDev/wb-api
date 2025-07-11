@@ -1,11 +1,6 @@
 import { reactive, watch, toRefs } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-/**
- * Универсальный composable для фильтров страницы с поддержкой localStorage и query
- * @param {string} pageKey - уникальный ключ страницы (например, 'sales', 'orders', 'incomes', 'stocks', 'home')
- * @param {object} defaultFilters - объект с дефолтными значениями фильтров
- */
 export function usePageFilters(pageKey, defaultFilters = {}) {
   const route = useRoute();
   const router = useRouter();

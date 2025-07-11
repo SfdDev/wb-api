@@ -2,6 +2,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useAPI } from '@/composables/useAPI';
 import { useTable } from '@/composables/useTable';
 import { usePageFilters } from '@/composables/usePageFilters';
+import { useUtils } from '@/composables/useUtils';
 
 export function useHomePage() {
   const defaultFilters = {
@@ -12,6 +13,7 @@ export function useHomePage() {
   };
   const { filters, updateFilters, clearFilters } = usePageFilters('home', defaultFilters);
   const { getTopChanges } = useTable();
+  const { getToday } = useUtils();
   // SALES
   const { data: salesData, fetchData: fetchSales, loading: salesLoading, error: salesError } = useAPI('/sales');
   const { data: salesPrevData, fetchData: fetchSalesPrev } = useAPI('/sales');
@@ -24,14 +26,6 @@ export function useHomePage() {
   // STOCKS
   const { data: stocksData, fetchData: fetchStocks, loading: stocksLoading, error: stocksError } = useAPI('/stocks');
   const { data: stocksPrevData, fetchData: fetchStocksPrev } = useAPI('/stocks');
-
-  function getToday() {
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd}`;
-  }
 
   // Функция для расчёта предыдущего периода (оставить!)
   function getPreviousPeriod(dateFrom, dateTo) {
