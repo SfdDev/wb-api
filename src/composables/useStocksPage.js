@@ -12,7 +12,6 @@ export function useStocksPage() {
   const dd = String(today.getDate()).padStart(2, '0');
   const formatted = `${yyyy}-${mm}-${dd}`;
   const defaultFilters = {
-    dateFrom: formatted,
     page: 1,
     limit: 10
   };
@@ -26,13 +25,22 @@ export function useStocksPage() {
   });
 
   function refreshData() {
-    filters.page = 1;
     loadData();
+  }
+
+  function getToday() {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
   }
 
   async function loadData() {
     const params = {
-      ...filters
+      dateFrom: getToday(),
+      page: filters.page,
+      limit: filters.limit
     };
     await fetchData(params).then(() => {
       filters.limit = data.value?.meta?.per_page || defaultFilters.limit;

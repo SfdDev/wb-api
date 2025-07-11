@@ -6,8 +6,10 @@ export function useTable () {
     };
       
       function getTopChanges(type, valueField, source, prevData) {
+        console.log(prevData);
         const current = filteredDataByType(type, source);
         const prev = filteredDataByType(type, prevData);
+        console.log(prev);
         const prevMap = {};
         prev.forEach(item => {
           prevMap[item.nm_id] = item;
@@ -17,6 +19,9 @@ export function useTable () {
           const prevItem = prevMap[item.nm_id] || {};
           const currentValue = item[valueField] || 0;
           const prevValue = prevItem[valueField] || 0;
+
+          console.log(prevItem);
+          console.log(currentValue, prevValue);
           const percentChange = prevValue === 0 ? (currentValue === 0 ? 0 : 100) : ((currentValue - prevValue) / Math.abs(prevValue)) * 100;
           return {
             nm_id: item.nm_id,
