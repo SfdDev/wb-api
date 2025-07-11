@@ -1,26 +1,9 @@
 export function useTable () {
-    const filteredDataByType = (type, source) => {
-        const rawData = source.value?.data || [];
-        switch (type) {
-          case 'total_price':
-            return rawData.filter(item => item.total_price);
-          case 'orders_count':
-            const ordersMap = {};
-            rawData.forEach(item => {
-              const key = item.nm_id;
-              if (key) {
-                ordersMap[key] = (ordersMap[key] || 0) + 1;
-              }
-            });
-            return Object.entries(ordersMap).map(([nm_id, count]) => ({ nm_id, count }));
-          case 'discount_percent':
-            return rawData.filter(item => item.discount_percent);
-          case 'income_id':
-            return rawData.filter(item => item.income_id);
-          default:
-            return rawData;
-        }
-      };
+    const filteredDataByType = (field, source) => {
+        const rawData = Array.isArray(source) ? source : (source?.value?.data || source?.data || []);
+        // Универсальная фильтрация по любому полю, без исключений
+        return rawData.filter(item => item[field] !== undefined && item[field] !== null && item[field] !== '');
+    };
       
       function getTopChanges(type, valueField, source, prevData) {
         const current = filteredDataByType(type, source);
