@@ -1,8 +1,7 @@
 <template>
-  <Line
-    :options="chartOptions"
-    :data="chartData"
-  />
+ <div @click="handleClick" style="cursor:pointer;">
+    <Line :options="chartOptions" :data="chartData" />
+  </div>
 </template>
 
 <script setup>
@@ -17,6 +16,7 @@ import {
   Tooltip,
   Legend
 } from 'chart.js'
+import { useRouter } from 'vue-router';
 
 ChartJS.register(
   CategoryScale,
@@ -56,6 +56,18 @@ const chartOptions = {
     legend: { position: 'top' },
     title: { display: false }
   }
+}
+
+const emit = defineEmits(['chart-click']);
+function handleClick() {
+  emit('chart-click', props.chartId);
+}
+
+const router = useRouter();
+
+function goToChartPage(type) {
+  // Например, переход на /sales или /chart/sales
+  router.push({ path: `/${type}` });
 }
 </script>
 
