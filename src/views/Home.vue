@@ -74,113 +74,27 @@
   </template>
   
   <script setup>
-  import { ref, computed, onMounted } from 'vue';
-import { useAPI } from '@/composables/useAPI';
+  import { useHomePage } from '@/composables/useHomePage';
 import ChartComponent from '@/components/ChartComponent.vue';
 import DataTable from '@/components/DataTable.vue';
-import { useRouter, useRoute } from 'vue-router';
-import { useTable } from '@/composables/useTable';
- 
-  const router = useRouter();
-  const route = useRoute();
- 
-  const defaultFilters = ref({
-    dateFrom: '2025-01-01',
-    dateTo: '2025-12-31',
-    page: 1,
-    limit: 10
-  });
-  
-  const filters = ref({
-    ...defaultFilters.value,
-    ...route.query
-  });
 
-const { filteredDataByType, getTopChanges } = useTable();
-
-const chartDataTotalPrice = computed(() => makeChartData('total_price', 'Сумма продаж', '#42b883'));
-const chartDataOrdersCount = computed(() => makeChartData('orders_count', 'Количество заказов', '#2c3e50'));
-const chartDataAverageCheck = computed(() => makeChartData('discount_percent', 'Процент скидки', '#e74c3c'));
-const chartDataNewUsers = computed(() => makeChartData('income_id', 'ID дохода', '#f39c12'));
-
-const topTotalPriceChanges = computed(() => getTopChanges('total_price', 'total_price', data, prevData));
-const topOrdersCountChanges = computed(() => getTopChanges('orders_count', 'count', data, prevData));
-const topDiscountPercentChanges = computed(() => getTopChanges('discount_percent', 'discount_percent', data, prevData));
-const topIncomeIdChanges = computed(() => getTopChanges('income_id', 'income_id', data, prevData));
-
-const topChangeColumns = [  
-  { key: 'nm_id', label: 'Артикул' },
-  { key: 'currentValue', label: 'Текущий период' },
-  { key: 'prevValue', label: 'Предыдущий период' },
-  { key: 'percentChange', label: 'Изменение (%)' },
-  { key: 'arrows', label:""}
-];
-  
-const { fetchData, data, loading, error } = useAPI('/orders');
-const { fetchData: fetchPrevData, data: prevData } = useAPI('/orders');
-
-onMounted(() => {
-  loadData();
-});
-
-function refreshData() {
-  filters.value.page = 1;
-  syncRouteParams();
-  loadData();
-}
-
-function getPreviousPeriod(dateFrom, dateTo) {
-  const from = new Date(dateFrom);
-  const to = new Date(dateTo);
-  const diff = to - from;
-  const prevTo = new Date(from);
-  prevTo.setDate(prevTo.getDate() - 1);
-  const prevFrom = new Date(prevTo.getTime() - diff);
-  return {
-    dateFrom: prevFrom.toISOString().slice(0, 10),
-    dateTo: prevTo.toISOString().slice(0, 10)
-  };
-}
-
-async function loadData() {
-  const params = {
-    ...filters.value
-  };
-  await fetchData(params).then(async () => {
-    filters.value.limit = data.value.meta.per_page;
-    syncRouteParams();
-    const prev = getPreviousPeriod(filters.value.dateFrom, filters.value.dateTo);
-    await fetchPrevData({ ...params, dateFrom: prev.dateFrom, dateTo: prev.dateTo });
-  });
-}
-
-function syncRouteParams() {
-    router.push({ query: { ...route.query, ...filters.value } });
-}
-  
-function makeChartData(field, label, color) {
-    const filteredData = filteredDataByType(field, data);
-    if (!filteredData.length) return { labels: [], datasets: [] };
-  
-    const labels = filteredData.map((_, i) => `Запись ${i + 1}`);
-  
-    const values = filteredData.map(item => {
-      const val = item[field] || item[Object.keys(item)[1]];
-      return val ? parseFloat(val) : 0;
-    });
-  
-    return {
-      labels,
-      datasets: [{
-        label,
-        data: values,
-        borderColor: color,
-        fill: false,
-        tension: 0.4
-      }]
-    };
-  }
-  
+const {
+  filters,
+  data,
+  prevData,
+  loading,
+  error,
+  chartDataTotalPrice,
+  chartDataOrdersCount,
+  chartDataAverageCheck,
+  chartDataNewUsers,
+  topTotalPriceChanges,
+  topOrdersCountChanges,
+  topDiscountPercentChanges,
+  topIncomeIdChanges,
+  topChangeColumns,
+  refreshData
+} = useHomePage();
   </script>
   
   <style>
