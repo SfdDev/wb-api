@@ -20,6 +20,7 @@
           chart-id="sales-total"
           :chart-data="salesChartData"
           chart-type="line"
+          @chart-click="goToChartPage('sales')"
         />
         <DataTable
           :data="salesTopChanges"
@@ -34,6 +35,7 @@
           chart-id="orders-count"
           :chart-data="ordersChartData"
           chart-type="line"
+          @chart-click="goToChartPage('orders')"
         />
         <DataTable  
           :data="ordersTopChanges"
@@ -48,10 +50,11 @@
           chart-id="discount-percent"
           :chart-data="stocksChartData"
           chart-type="line"
+          @chart-click="goToChartPage('stocks')"
         />
  
         <DataTable
-          :data="topDiscountPercentChanges"
+          :data="stocksTopChanges"
           :columns="topChangeColumns"
         />
       </div> 
@@ -62,6 +65,7 @@
           chart-id="income-id"
           :chart-data="incomesChartData"
           chart-type="line"
+          @chart-click="goToChartPage('incomes')"
         />
         <DataTable
           :data="incomesTopChanges"
@@ -77,26 +81,29 @@
 import { useHomePage } from '@/composables/useHomePage';
 import ChartComponent from '@/components/ChartComponent.vue';
 import DataTable from '@/components/DataTable.vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const {
+  loading,
   filters,
-  clearFilters,
-  salesData,
   salesTopChanges,
   salesChartData,
-  ordersData,
   ordersTopChanges,
   ordersChartData,
-  incomesData,
   incomesTopChanges,
   incomesChartData,
-  stocksData,
   stocksTopChanges,
   stocksChartData,
   topChangeColumns,
-  refreshAll,
-  getPreviousPeriod
+  refreshAll
 } = useHomePage();
+
+function goToChartPage(type) {
+  // Например, переход на /sales или /chart/sales
+  router.push({ path: `/${type}` });
+}
 </script>
 
 <style>
