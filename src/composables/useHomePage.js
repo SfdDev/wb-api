@@ -11,39 +11,29 @@ export function useHomePage() {
     limit: 10
   };
   const { filters, updateFilters, clearFilters } = usePageFilters('home', defaultFilters);
+  const { getTopChanges } = useTable();
+  // SALES
+  const { data: salesData, fetchData: fetchSales, loading: salesLoading, error: salesError } = useAPI('/sales');
+  const { data: salesPrevData, fetchData: fetchSalesPrev } = useAPI('/sales');
+  // ORDERS
+  const { data: ordersData, fetchData: fetchOrders, loading: ordersLoading, error: ordersError } = useAPI('/orders');
+  const { data: ordersPrevData, fetchData: fetchOrdersPrev } = useAPI('/orders');
+  // INCOMES
+  const { data: incomesData, fetchData: fetchIncomes, loading: incomesLoading, error: incomesError } = useAPI('/incomes');
+  const { data: incomesPrevData, fetchData: fetchIncomesPrev } = useAPI('/incomes');
+  // STOCKS
+  const { data: stocksData, fetchData: fetchStocks, loading: stocksLoading, error: stocksError } = useAPI('/stocks');
+  const { data: stocksPrevData, fetchData: fetchStocksPrev } = useAPI('/stocks');
 
-  const { filteredDataByType, getTopChanges } = useTable();
-
-  const { fetchData, data, loading, error } = useAPI('/orders');
-  const { fetchData: fetchPrevData, data: prevData } = useAPI('/orders');
-
-  const chartDataTotalPrice = computed(() => makeChartData('total_price', 'Сумма продаж', '#42b883'));
-  const chartDataOrdersCount = computed(() => makeChartData('total_price', 'Количество заказов', '#2c3e50'));
-  const chartDataAverageCheck = computed(() => makeChartData('discount_percent', 'Процент скидки', '#e74c3c'));
-  const chartDataNewUsers = computed(() => makeChartData('income_id', 'ID дохода', '#f39c12'));
-
-  const topTotalPriceChanges = computed(() => getTopChanges('total_price', 'total_price', data, prevData));
-  const topOrdersCountChanges = computed(() => getTopChanges('total_price', 'count', data, prevData));
-  const topDiscountPercentChanges = computed(() => getTopChanges('discount_percent', 'discount_percent', data, prevData));
-  const topIncomeIdChanges = computed(() => getTopChanges('income_id', 'income_id', data, prevData));
-
-  const topChangeColumns = [  
-    { key: 'nm_id', label: 'Артикул' },
-    { key: 'currentValue', label: 'Текущий период' },
-    { key: 'prevValue', label: 'Предыдущий период' },
-    { key: 'percentChange', label: 'Изменение (%)' },
-    { key: 'arrows', label: "" }
-  ];
-
-  onMounted(() => {
-    loadData();
-  });
-
-  function refreshData() {
-    filters.page = 1;
-    loadData();
+  function getToday() {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
   }
 
+  // Функция для расчёта предыдущего периода (оставить!)
   function getPreviousPeriod(dateFrom, dateTo) {
     const from = new Date(dateFrom);
     const to = new Date(dateTo);
@@ -57,54 +47,88 @@ export function useHomePage() {
     };
   }
 
-  async function loadData() {
-    const params = {
-      ...filters
-    };
-    await fetchData(params).then(async () => {
-      filters.limit = data.value.meta.per_page;
-      const prev = getPreviousPeriod(filters.dateFrom, filters.dateTo);
-      await fetchPrevData({ ...params, dateFrom: prev.dateFrom, dateTo: prev.dateTo });
-    });
-  }
+  // Колонки для всех таблиц одинаковые
+  const topChangeColumns = [
+    { key: 'nm_id', label: 'Артикул' },
+    { key: 'currentValue', label: 'Текущий период' },
+    { key: 'prevValue', label: 'Предыдущий период' },
+    { key: 'percentChange', label: 'Изменение (%)' },
+    { key: 'arrows', label: '' }
+  ];
 
-  function makeChartData(field, label, color) {
-    const filteredData = filteredDataByType(field, data);
-    if (!filteredData.length) return { labels: [], datasets: [] };
-    const labels = filteredData.map((_, i) => `Запись ${i + 1}`);
-    const values = filteredData.map(item => {
-      const val = item[field] || item[Object.keys(item)[1]];
-      return val ? parseFloat(val) : 0;
-    });
+  // Chart data (можно оставить как есть, если нужно)
+  function makeChartData(field, label, color, data) {
+    console.log(data);
+    if (!data?.value?.data) return { labels: [], datasets: [] };
+    const arr = data.value.data;
+    const labels = arr.map((_, i) => `Запись ${i + 1}`);
+    const values = arr.map(item => item[field] || 0);
     return {
       labels,
-      datasets: [{
-        label,
-        data: values,
-        borderColor: color,
-        fill: false,
-        tension: 0.4
-      }]
+      datasets: [{ label, data: values, borderColor: color, fill: false, tension: 0.4 }]
     };
+  }
+
+  // Top changes для каждого блока
+  const salesTopChanges = computed(() => getTopChanges('total_price', 'total_price', salesData, salesPrevData));
+  const ordersTopChanges = computed(() => getTopChanges('total_price', 'total_price', ordersData, ordersPrevData));
+  const incomesTopChanges = computed(() => getTopChanges('quantity', 'quantity', incomesData, incomesPrevData));
+  const stocksTopChanges = computed(() => getTopChanges('price', 'price', stocksData, stocksPrevData));
+
+  // Chart data для каждого блока
+  const salesChartData = computed(() => makeChartData('total_price', 'Сумма продаж', '#42b883', salesData));
+  const ordersChartData = computed(() => makeChartData('total_price', 'Сумма заказов', '#ffa500', ordersData));
+  const incomesChartData = computed(() => makeChartData('quantity', 'Сумма доходов', '#e74c3c', incomesData));
+  const stocksChartData = computed(() => makeChartData('price', 'Сумма остатков', '#007bff', stocksData));
+
+  // Загрузка всех данных при монтировании и при обновлении фильтров
+  onMounted(() => {
+    refreshAll();
+  });
+
+  async function refreshAll() {
+    // Текущий период
+    await Promise.all([
+      fetchSales({ ...filters }),
+      fetchOrders({ ...filters }),
+      fetchIncomes({ ...filters }),
+      fetchStocks({ dateFrom: getToday(), page: filters.page, limit: filters.limit })
+    ]);
+    // Предыдущий период (если есть даты)
+    if (filters.dateFrom && filters.dateTo) {
+      const prev = getPreviousPeriod(filters.dateFrom, filters.dateTo);
+      await Promise.all([
+        fetchSalesPrev({ ...filters, dateFrom: prev.dateFrom, dateTo: prev.dateTo }),
+        fetchOrdersPrev({ ...filters, dateFrom: prev.dateFrom, dateTo: prev.dateTo }),
+        fetchIncomesPrev({ ...filters, dateFrom: prev.dateFrom, dateTo: prev.dateTo }),
+        fetchStocksPrev({ dateFrom: getToday(), page: filters.page, limit: filters.limit })
+      ]);
+    }
   }
 
   return {
     filters,
-    data,
-    prevData,
-    loading,
-    error,
-    chartDataTotalPrice,
-    chartDataOrdersCount,
-    chartDataAverageCheck,
-    chartDataNewUsers,
-    topTotalPriceChanges,
-    topOrdersCountChanges,
-    topDiscountPercentChanges,
-    topIncomeIdChanges,
-    topChangeColumns,
-    refreshData,
     updateFilters,
-    clearFilters
+    clearFilters,
+    // SALES
+    salesData,
+    salesTopChanges,
+    salesChartData,
+    // ORDERS
+    ordersData,
+    ordersTopChanges,
+    ordersChartData,
+    // INCOMES
+    incomesData,
+    incomesTopChanges,
+    incomesChartData,
+    // STOCKS
+    stocksData,
+    stocksTopChanges,
+    stocksChartData,
+    // Общее
+    topChangeColumns,
+    refreshAll,
+    getPreviousPeriod
   };
 } 
