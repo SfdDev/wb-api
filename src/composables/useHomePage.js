@@ -52,7 +52,6 @@ export function useHomePage() {
 
   // Chart data (можно оставить как есть, если нужно)
   function makeChartData(field, label, color, data) {
-    console.log(data);
     if (!data?.value?.data) return { labels: [], datasets: [] };
     const arr = data.value.data;
     const labels = arr.map((_, i) => `Запись ${i + 1}`);
@@ -81,7 +80,7 @@ export function useHomePage() {
   });
 
   async function refreshAll() {
-    // Текущий период
+    console.log(filters)
     await Promise.all([
       fetchSales({ ...filters }),
       fetchOrders({ ...filters }),

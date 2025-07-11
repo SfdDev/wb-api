@@ -18,8 +18,6 @@ export function useTable () {
           const currentValue = item[valueField] || 0;
           const prevValue = prevItem[valueField] || 0;
 
-          console.log(prevItem);
-          console.log(currentValue, prevValue);
           const percentChange = prevValue === 0 ? (currentValue === 0 ? 0 : 100) : ((currentValue - prevValue) / Math.abs(prevValue)) * 100;
           return {
             nm_id: item.nm_id,
