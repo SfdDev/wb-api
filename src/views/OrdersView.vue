@@ -24,22 +24,23 @@
 </template>
 
 <script setup>
-import { useTablePage } from '@/composables/useTablePage';
+import { useDataPage } from '@/composables/useDataPage';
 import ChartComponent from '@/components/ChartComponent.vue';
 import DataTable from '@/components/DataTable.vue';
 import Pagination from '@/components/Pagination.vue';
 
 const {
-  filters,
   data,
   loading,
   error,
   chartData,
+  columns,
+  filters,
   refreshData,
-  handlePageChange,
-  columns
-} = useTablePage({
-  endpoint: '/orders',
+  handlePageChange
+} = useDataPage({
+  mode: 'table',
+  endpoints: ['/orders'],
   filterKey: 'orders',
   defaultFilters: {
     dateFrom: '2025-01-01',
@@ -47,12 +48,14 @@ const {
     page: 1,
     limit: 10
   },
-  chartField: 'total_price',
-  chartLabel: 'Сумма продаж',
-  chartColor: '#42b883',
-  columns: [
-    { key: 'brand', label: 'Бренд' },
-    { key: 'category', label: 'Категория' }
-  ]
+  config: {
+    chartField: 'total_price',
+    chartLabel: 'Сумма продаж',
+    chartColor: '#ffa500',
+    columns: [
+      { key: 'brand', label: 'Бренд' },
+      { key: 'category', label: 'Категория' }
+    ]
+  }
 });
 </script>

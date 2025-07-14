@@ -20,37 +20,40 @@
 </template>
 
 <script setup>
-import { useTablePage } from '@/composables/useTablePage';
-import { useUtils } from '@/composables/useUtils'; // импортируем утилиту
+import { useDataPage } from '@/composables/useDataPage';
+import { useUtils } from '@/composables/useUtils';
 import ChartComponent from '@/components/ChartComponent.vue';
 import DataTable from '@/components/DataTable.vue';
 import Pagination from '@/components/Pagination.vue';
 
-const { getToday } = useUtils(); // получаем функцию
+const { getToday } = useUtils();
 
 const {
-  filters,
   data,
   loading,
   error,
   chartData,
+  columns,
+  filters,
   refreshData,
-  handlePageChange,
-  columns
-} = useTablePage({
-  endpoint: '/stocks',
+  handlePageChange
+} = useDataPage({
+  mode: 'table',
+  endpoints: ['/stocks'],
   filterKey: 'stocks',
   defaultFilters: {
     page: 1,
     limit: 10
   },
-  chartField: 'price',
-  chartLabel: 'Цена',
-  chartColor: '#42b883',
-  columns: [
-    { key: 'price', label: 'Цена' },
-    { key: 'warehouse_name', label: 'Склад' }
-  ],
+  config: {
+    chartField: 'price',
+    chartLabel: 'Цена',
+    chartColor: '#007bff',
+    columns: [
+      { key: 'price', label: 'Цена' },
+      { key: 'warehouse_name', label: 'Склад' }
+    ]
+  },
   getRequestParams: (filters) => ({
     dateFrom: getToday(),
     page: filters.page,
