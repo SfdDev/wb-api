@@ -1,8 +1,8 @@
 <template>
   <div>
     <h2>Аналитика заказов</h2>
-
-    <form @submit.prevent="refreshAll">
+ 
+    <form @submit.prevent="refreshData">
       <div class="filters">
         <input v-model="filters.dateFrom" type="date">
         <input v-model="filters.dateTo" type="date">
@@ -10,75 +10,68 @@
       </div>
     </form>
 
-    <div v-if="loading">Загрузка данных...</div>
-    
-    <template v-else>
-
+   
       <div class="chart-block">
         <h3>Сумма продаж</h3>
         <ChartComponent
-          chart-id="sales-total"
+          chart-id="sales"
           :chart-data="salesChartData"
           chart-type="line"
-          @chart-click="goToChartPage('sales')"
+          @chart-click="goToChartPage"
         />
         <DataTable
           :data="salesTopChanges"
           :columns="topChangeColumns"
         />
-     
       </div>
 
       <div class="chart-block">
         <h3>Количество заказов</h3>
         <ChartComponent
-          chart-id="orders-count"
+          chart-id="orders"
           :chart-data="ordersChartData"
           chart-type="line"
-          @chart-click="goToChartPage('orders')"
+          @chart-click="goToChartPage"
         />
         <DataTable  
           :data="ordersTopChanges"
           :columns="topChangeColumns"
         />
-        
       </div>
 
-       <div class="chart-block">
+      <div class="chart-block">
         <h3>Процент скидки</h3>
         <ChartComponent
-          chart-id="discount-percent"
+          chart-id="stocks"
           :chart-data="stocksChartData"
           chart-type="line"
-          @chart-click="goToChartPage('stocks')"
+          @chart-click="goToChartPage"
         />
- 
         <DataTable
           :data="stocksTopChanges"
           :columns="topChangeColumns"
         />
-      </div> 
+      </div>
 
       <div class="chart-block">
         <h3>ID дохода</h3>
         <ChartComponent
-          chart-id="income-id"
+          chart-id="incomes"
           :chart-data="incomesChartData"
           chart-type="line"
-          @chart-click="goToChartPage('incomes')"
+          @chart-click="goToChartPage"
         />
         <DataTable
           :data="incomesTopChanges"
           :columns="topChangeColumns"
         />
       </div>
-      
-    </template>
+   
   </div>
 </template>
 
 <script setup>
-import { useHomePage } from '@/composables/useHomePage';
+import { useDataPage } from '@/composables/useDataPage';
 import ChartComponent from '@/components/ChartComponent.vue';
 import DataTable from '@/components/DataTable.vue';
 import { useRouter } from 'vue-router';
@@ -86,7 +79,6 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 const {
-  loading,
   filters,
   salesTopChanges,
   salesChartData,
@@ -97,13 +89,57 @@ const {
   stocksTopChanges,
   stocksChartData,
   topChangeColumns,
-  refreshAll
-} = useHomePage();
+  refreshData
+} = useDataPage({
+  mode: 'dashboard',
+  endpoints: ['/sales', '/orders', '/incomes', '/stocks'],
+  filterKey: 'home',
+  defaultFilters: {
+    dateFrom: '2025-01-01',
+    dateTo: '2025-12-31',
+    page: 1,
+    limit: 10
+  },
+  config: [
+    {
+      key: 'sales',
+      typeField: 'total_price',
+      valueField: 'total_price',
+      chartField: 'total_price',
+      chartLabel: 'Сумма продаж',
+      chartColor: '#42b883'
+    },
+    {
+      key: 'orders',
+      typeField: 'total_price',
+      valueField: 'total_price',
+      chartField: 'total_price',
+      chartLabel: 'Сумма заказов',
+      chartColor: '#ffa500'
+    },
+    {
+      key: 'incomes',
+      typeField: 'income_id',
+      valueField: 'income_id',
+      chartField: 'income_id',
+      chartLabel: 'ID дохода',
+      chartColor: '#e74c3c'
+    },
+    {
+      key: 'stocks',
+      typeField: 'price',
+      valueField: 'price',
+      chartField: 'price',
+      chartLabel: 'Сумма остатков',
+      chartColor: '#007bff'
+    }
+  ]
+});
 
-function goToChartPage(type) {
-  // Например, переход на /sales или /chart/sales
-  router.push({ path: `/${type}` });
+function goToChartPage(page) {
+  router.push({ path: `/${page}` });
 }
+
 </script>
 
 <style>

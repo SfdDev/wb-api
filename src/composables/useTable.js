@@ -1,7 +1,6 @@
 export function useTable () {
     const filteredDataByType = (field, source) => {
-        const rawData = Array.isArray(source) ? source : (source?.value?.data || source?.data || []);
-        // Универсальная фильтрация по любому полю, без исключений
+      const rawData = Array.isArray(source?.data) ? source.data : (Array.isArray(source) ? source : []);        // Универсальная фильтрация по любому полю, без исключений
         return rawData.filter(item => item[field] !== undefined && item[field] !== null && item[field] !== '');
     };
       
